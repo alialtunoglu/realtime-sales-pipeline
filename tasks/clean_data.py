@@ -65,6 +65,3 @@ def run_silver_cleaning():
 
 if __name__ == "__main__":
     run_silver_cleaning()
-
-if __name__ == "__main__":
-    run_silver_cleaning()
