@@ -5,7 +5,7 @@ Ingests raw data from CSV to Delta Lake Bronze layer
 import time
 from typing import Optional
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, current_timestamp
+from pyspark.sql.functions import col, current_timestamp, lit
 
 from config.settings import config
 from src.utils.logger import get_logger, log_execution_time
@@ -20,6 +20,7 @@ class BronzeETL:
     def __init__(self):
         self.spark = get_spark()
         self.config = config
+        self.logger = logger  # Add logger instance for testing
     
     @log_execution_time(logger)
     def extract_from_csv(self, file_path: str) -> DataFrame:
@@ -72,8 +73,14 @@ class BronzeETL:
         logger.info("🔄 Applying Bronze layer transformations")
         
         # Add ingestion metadata
-        df_bronze = df.withColumn("ingestion_timestamp", current_timestamp()) \
-                     .withColumn("source_file", col("_metadata.file_path"))
+        df_bronze = df.withColumn("ingestion_timestamp", current_timestamp())
+        
+        # Add source file path if metadata exists (for real file reads)
+        if "_metadata" in [field.name for field in df.schema.fields]:
+            df_bronze = df_bronze.withColumn("source_file", col("_metadata.file_path"))
+        else:
+            # For test data or manual DataFrames, use a default source
+            df_bronze = df_bronze.withColumn("source_file", lit("manual_input"))
         
         # Log schema info
         logger.info(
