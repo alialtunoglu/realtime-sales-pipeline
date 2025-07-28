@@ -8,6 +8,7 @@ __pycache__/
 
 # Spark / Delta Output
 delta/
+data/
 data/output/
 data/input/*.csv
 data/input/*.json

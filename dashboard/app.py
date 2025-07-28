@@ -28,3 +28,13 @@ st.bar_chart(df_top.set_index("Description")[["TotalSold"]])
 df_country = spark.read.format("delta").load("delta/gold/country_sales").toPandas()
 st.subheader("🌍 Ülke Bazlı Satış Dağılımı")
 st.bar_chart(df_country.set_index("Country")[["CountryRevenue"]])
+
+# RFM SEGMENTATION
+df_rfm = spark.read.format("delta").load("delta/gold/rfm_table").toPandas()
+st.subheader("📊 RFM Analizi (Recency - Frequency - Monetary)")
+st.dataframe(df_rfm.sort_values("Monetary", ascending=False).head(20))
+
+# CLTV ANALYSIS
+df_cltv = spark.read.format("delta").load("delta/gold/cltv_table").toPandas()
+st.subheader("💰 CLTV (Customer Lifetime Value) Analizi")
+st.dataframe(df_cltv.sort_values("CLTV", ascending=False).head(20))
