@@ -209,3 +209,7 @@ def log_execution_time(logger: PipelineLogger):
         
         return wrapper
     return decorator
+
+
+# Create global logger instance
+logger = PipelineLogger("pipeline")

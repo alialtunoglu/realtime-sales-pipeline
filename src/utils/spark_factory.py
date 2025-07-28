@@ -7,9 +7,9 @@ from delta import configure_spark_with_delta_pip
 from typing import Optional
 
 from config.settings import config
-from src.utils.logger import get_logger
+from src.utils.logger import PipelineLogger
 
-logger = get_logger(__name__)
+logger = PipelineLogger(__name__)
 
 
 class SparkSessionFactory:
@@ -88,3 +88,7 @@ def get_spark() -> SparkSession:
         Configured Spark session
     """
     return SparkSessionFactory.get_spark_session()
+
+
+# Alias for backward compatibility
+SparkFactory = SparkSessionFactory
