@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.ipynb_checkpoints
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Spark / Delta Output
+delta/
+data/output/
+data/input/*.csv
+data/input/*.json
+
+# Environment
+.env
+*.egg-info/
