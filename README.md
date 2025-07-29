@@ -2,6 +2,8 @@
 
 Modern **Medallion Architecture** ile geliştirilmiş retail satış veri pipeline'ı. Apache Spark, Delta Lake, ve Apache Airflow kullanarak Bronze-Silver-Gold katmanlı veri işleme sistemi.
 
+![CI/CD Pipeline](https://github.com/alialtunoglu/realtime-sales-pipeline/workflows/Pipeline%20CI/CD/badge.svg)
+
 ## 🏗️ Mimari
 
 ```
