@@ -3,7 +3,7 @@ pyspark==3.3.4
 delta-spark==2.2.0
 
 # Workflow Orchestration
-apache-airflow==2.8.1
+apache-airflow==2.10.3
 
 # Dashboard & Visualization
 streamlit==1.28.0

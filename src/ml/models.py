@@ -5,7 +5,7 @@ Uses time series analysis to predict future sales trends
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, sum as spark_sum, avg, count, date_format
 from pyspark.ml.feature import VectorAssembler
@@ -294,7 +294,7 @@ class ModelManager:
     
     def __init__(self, model_dir: str = "models"):
         self.model_dir = model_dir
-        self.models = {}
+        self.models: Dict[str, Any] = {}
         
     def register_model(self, name: str, model) -> None:
         """Register a trained model"""

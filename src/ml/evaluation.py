@@ -2,11 +2,11 @@
 ML Model Evaluation Utilities
 Provides comprehensive model evaluation and monitoring
 """
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 import json
 from datetime import datetime
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, avg, count, stddev, min as spark_min, max as spark_max
+from pyspark.sql.functions import col, avg, count, stddev, min as spark_min, max as spark_max, abs as spark_abs, sum as spark_sum
 
 from src.utils.logger import PipelineLogger
 
@@ -44,7 +44,7 @@ class ModelEvaluator:
             (col(label_col) - col(prediction_col)) ** 2
         ).withColumn(
             "abs_residual",
-            abs(col(label_col) - col(prediction_col))
+            spark_abs(col(label_col) - col(prediction_col))
         )
         
         # Calculate metrics
@@ -65,12 +65,12 @@ class ModelEvaluator:
         # Calculate additional metrics
         rmse = mse ** 0.5
         mape = (predictions_with_residuals.agg(
-            avg(abs(col("residual") / col(label_col)) * 100).alias("mape")
+            avg(spark_abs(col("residual") / col(label_col)) * 100).alias("mape")
         ).collect()[0]["mape"])
         
         # R-squared calculation
         ss_res = predictions_with_residuals.agg(
-            sum(col("squared_residual")).alias("ss_res")
+            spark_sum(col("squared_residual")).alias("ss_res")
         ).collect()[0]["ss_res"]
         
         ss_tot = n * (std_actual ** 2)
@@ -200,7 +200,7 @@ class ModelEvaluator:
 class ModelMonitor:
     """Model performance monitoring and alerting"""
     
-    def __init__(self, threshold_config: Dict[str, float] = None):
+    def __init__(self, threshold_config: Optional[Dict[str, float]] = None):
         self.thresholds = threshold_config or {
             "min_r_squared": 0.7,
             "max_mae": 1000.0,
