@@ -14,13 +14,13 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
-    openjdk-11-jdk \
+    default-jdk \
     curl \
     procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Set JAVA_HOME
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 # Stage 2: Dependencies installation
 FROM base as dependencies
