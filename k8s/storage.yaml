@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pipeline-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pipeline-logs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pipeline-airflow-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pipeline-config
+data:
+  PYTHONPATH: "/app"
+  SPARK_HOME: "/opt/spark"
+  AIRFLOW__CORE__EXECUTOR: "LocalExecutor"
+  AIRFLOW__CORE__DAGS_FOLDER: "/app/airflow/dags"
+  AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pipeline-secrets
+type: Opaque
+data:
+  # Base64 encoded values
+  AIRFLOW_ADMIN_PASSWORD: YWRtaW4=  # admin
+  DATABASE_PASSWORD: cGFzc3dvcmQ=     # password

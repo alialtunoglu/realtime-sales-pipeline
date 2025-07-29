@@ -1,0 +1,173 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-dashboard
+  labels:
+    app: pipeline-dashboard
+    component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pipeline-dashboard
+  template:
+    metadata:
+      labels:
+        app: pipeline-dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: pipeline:latest
+        ports:
+        - containerPort: 8501
+        env:
+        - name: PYTHONPATH
+          value: "/app"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8501
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8501
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: pipeline-data-pvc
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: pipeline-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipeline-dashboard-service
+spec:
+  selector:
+    app: pipeline-dashboard
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8501
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-monitoring
+  labels:
+    app: pipeline-monitoring
+    component: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pipeline-monitoring
+  template:
+    metadata:
+      labels:
+        app: pipeline-monitoring
+    spec:
+      containers:
+      - name: monitoring
+        image: pipeline:latest
+        command: ["python", "monitoring.py", "run", "--continuous", "--interval", "60"]
+        env:
+        - name: PYTHONPATH
+          value: "/app"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: pipeline-logs-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+  labels:
+    app: airflow-webserver
+    component: orchestration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-webserver
+  template:
+    metadata:
+      labels:
+        app: airflow-webserver
+    spec:
+      containers:
+      - name: webserver
+        image: pipeline:latest
+        command: ["airflow", "webserver"]
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: "LocalExecutor"
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: "sqlite:////app/airflow/airflow.db"
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: "/app/airflow/dags"
+        - name: PYTHONPATH
+          value: "/app"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: airflow-volume
+          mountPath: /app/airflow
+        - name: logs-volume
+          mountPath: /app/logs
+      volumes:
+      - name: airflow-volume
+        persistentVolumeClaim:
+          claimName: pipeline-airflow-pvc
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: pipeline-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-webserver-service
+spec:
+  selector:
+    app: airflow-webserver
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP
