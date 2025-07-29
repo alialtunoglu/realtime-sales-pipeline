@@ -1,35 +1,112 @@
 # 🛍️ Real-time Sales Pipeline
 
-Modern **Medallion Architecture** ile geliştirilmiş retail satış veri pipeline'ı. Apache Spark, Delta Lake, ve Apache Airflow kullanarak Bronze-Silver-Gold katmanlı veri işleme sistemi.
+Modern **Medallion Architecture** ile geliştirilmiş enterprise-grade retail satış veri pipeline'ı. Apache Spark, Delta Lake, Apache Airflow, ve kapsamlı monitoring sistemi ile production-ready veri işleme platformu.
 
-![CI/CD Pipeline](https://github.com/alialtunoglu/realtime-sales-pipeline/workflows/Pipeline%20CI/CD/badge.svg)
+[![CI/CD](https://github.com/alialtunoglu/realtime-sales-pipeline/workflows/Pipeline%20CI/CD/badge.svg)](https://github.com/alialtunoglu/realtime-sales-pipeline/actions)
+[![Coverage](https://codecov.io/gh/alialtunoglu/realtime-sales-pipeline/branch/main/graph/badge.svg)](https://codecov.io/gh/alialtunoglu/realtime-sales-pipeline)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=realtime-sales-pipeline&metric=alert_status)](https://sonarcloud.io/dashboard?id=realtime-sales-pipeline)
 
-## 🏗️ Mimari
+## 🏗️ Sistem Mimarisi
 
 ```
-📁 CSV Data → 🥉 Bronze → 🥈 Silver → 🥇 Gold → 🔬 Advanced Analytics → 📊 Dashboard
+📁 Data Sources → 🥉 Bronze → 🥈 Silver → 🥇 Gold → 🤖 ML Models → 📊 Dashboard
+                    ↓         ↓         ↓          ↓
+                 🔍 Monitoring & Alerting System
 ```
 
 ### Katmanlar:
-- **🥉 Bronze:** Ham veri (Delta format)
-- **🥈 Silver:** Temizlenmiş veri (Validated)  
-- **🥇 Gold:** İş analitiği tabloları
-- **🔬 Advanced:** RFM, CLTV, Forecasting
+- **🥉 Bronze:** Ham veri (Delta format, schema validation)
+- **🥈 Silver:** Temizlenmiş veri (Quality checks, business rules)  
+- **🥇 Gold:** İş analitiği tabloları (Aggregated metrics)
+- **🤖 ML Layer:** Forecasting & segmentation models
+- **� Monitoring:** Real-time health checks & alerting
+
+## ✨ Özellikler
+
+### 📊 Veri İşleme
+- **Medallion Architecture** ile katmanlı veri işleme
+- **Delta Lake** ile ACID transactions ve time travel
+- **Apache Spark** ile ölçeklenebilir veri işleme
+- **Apache Airflow** ile orkestrasyon
+
+### 🤖 Makine Öğrenmesi
+- Satış tahminleme (Sales Forecasting)
+- Müşteri segmentasyonu (RFM Analysis)
+- Customer Lifetime Value (CLTV) hesaplama
+- Model performans izleme
+
+### 🔍 Monitoring & Observability
+- Real-time sistem sağlık kontrolü
+- Veri kalitesi metrikleri
+- Model performans izleme
+- Otomatik alert sistemi
+- Interactive dashboard (Streamlit)
+
+### 🚀 Production Ready
+- Docker containerization
+- Kubernetes deployment manifests
+- CI/CD pipeline (GitHub Actions)
+- Comprehensive testing (55 unit tests)
+- Security scanning
+- Performance monitoring
 
 ## 🚀 Hızlı Başlangıç
 
-### 1️⃣ Ortam Hazırlığı
-```bash
-# Conda environment aktif et
-conda activate spark-delta-env
+### 1️⃣ Development Environment
 
-# Gerekli paketleri kur (eğer yoksa)
-pip install pyspark delta-spark apache-airflow streamlit plotly
+```bash
+# Repository'yi klonla
+git clone https://github.com/alialtunoglu/realtime-sales-pipeline.git
+cd realtime-sales-pipeline
+
+# Virtual environment oluştur
+python -m venv retail-analytics
+source retail-analytics/bin/activate  # Linux/Mac
+# retail-analytics\Scripts\activate  # Windows
+
+# Dependencies kur
+pip install -r requirements.txt
 ```
 
-### 2️⃣ Pipeline'ı Çalıştır
+### 2️⃣ Quick Start
 ```bash
-# Hızlı test
+# Pipeline'ı test et
+python test_pipeline.sh
+
+# Dashboard'u başlat
+streamlit run dashboard/app.py
+
+# Monitoring başlat
+python monitoring.py run
+
+# CLI aracını kullan
+python -m src.monitoring.cli status
+```
+
+### 3️⃣ Production Deployment
+
+#### Docker Compose ile
+```bash
+# Production deployment
+./deploy/deploy.sh production
+
+# Servisleri kontrol et
+docker-compose ps
+
+# Logları izle
+docker-compose logs -f monitoring
+```
+
+#### Kubernetes ile
+```bash
+# Kubernetes'e deploy et
+kubectl apply -f k8s/storage.yaml
+kubectl apply -f k8s/deployment.yaml
+
+# Servisleri kontrol et
+kubectl get pods
+kubectl get services
+```
 ./test_pipeline.sh
 
 # Tam pipeline

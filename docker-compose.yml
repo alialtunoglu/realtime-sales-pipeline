@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # Main application with Streamlit dashboard
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
+      - SPARK_HOME=/opt/spark
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./delta:/app/delta
+      - ./checkpoints:/app/checkpoints
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - pipeline-network
+
+  # Airflow webserver
+  airflow-webserver:
+    build: .
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@pipeline.local &&
+        airflow webserver
+      "
+    ports:
+      - "8080:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////app/airflow/airflow.db
+      - AIRFLOW__CORE__DAGS_FOLDER=/app/airflow/dags
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - PYTHONPATH=/app
+    volumes:
+      - ./airflow:/app/airflow
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./delta:/app/delta
+    depends_on:
+      - dashboard
+    networks:
+      - pipeline-network
+
+  # Airflow scheduler
+  airflow-scheduler:
+    build: .
+    command: airflow scheduler
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////app/airflow/airflow.db
+      - AIRFLOW__CORE__DAGS_FOLDER=/app/airflow/dags
+      - PYTHONPATH=/app
+    volumes:
+      - ./airflow:/app/airflow
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./delta:/app/delta
+    depends_on:
+      - airflow-webserver
+    networks:
+      - pipeline-network
+
+  # Monitoring service
+  monitoring:
+    build: .
+    command: python monitoring.py run --continuous --interval 60
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./delta:/app/delta
+    depends_on:
+      - dashboard
+    networks:
+      - pipeline-network
+
+  # Prometheus for metrics collection (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - pipeline-network
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - pipeline-network
+
+networks:
+  pipeline-network:
+    driver: bridge
+
+volumes:
+  grafana-storage:

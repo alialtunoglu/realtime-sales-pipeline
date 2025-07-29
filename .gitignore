@@ -18,6 +18,33 @@ var/
 wheels/
 share/python-wheels/
 *.egg-info/
+
+# 🔒 Environment and Secrets
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+*.key
+*.pem
+secrets/
+
+# 🐳 Docker
+.dockerignore
+docker-compose.override.yml
+
+# ☸️ Kubernetes
+kubeconfig
+*.kubeconfig
+
+# 💾 Backups
+backups/
+*.backup
+*.bak
+
+# 📊 Monitoring
+grafana-storage/
+prometheus-data/
 .installed.cfg
 *.egg
 MANIFEST
